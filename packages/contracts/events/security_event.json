@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lightwatch.dev/schemas/security_event/v2",
+  "title": "Lightwatch Security Event",
+  "description": "Schema for security event ingestion. v2 adds event_id, trace_id, and schema_version.",
+  "type": "object",
+  "required": ["service", "type", "source_ip"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Client-supplied unique event identifier. Generated server-side if omitted."
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Distributed trace identifier for correlating events across services."
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 2,
+      "description": "Schema version number."
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Source service name."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "brute_force",
+        "port_scan",
+        "auth_failure",
+        "malware",
+        "injection",
+        "xss",
+        "ddos",
+        "privilege_escalation",
+        "other"
+      ],
+      "description": "Security event classification."
+    },
+    "source_ip": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 45,
+      "description": "Origin IP address (IPv4 or IPv6)."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2048,
+      "description": "Human-readable event description."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Threat severity level."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Arbitrary metadata (user agent, geo, etc.).",
+      "additionalProperties": true
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Indexed key-value tags for filtering."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp (ISO 8601). Defaults to server time if omitted."
+    }
+  },
+  "additionalProperties": false
+}

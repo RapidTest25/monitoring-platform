@@ -1,0 +1,79 @@
+# Traefik dynamic configuration – routing & middleware
+http:
+  routers:
+    # ── Ingest routes ──
+    ingest:
+      rule: "PathPrefix(`/ingest`)"
+      entryPoints:
+        - web
+      service: ingest-node
+      middlewares:
+        - rate-limit-ingest
+        - security-headers
+
+    # ── API routes ──
+    api:
+      rule: "PathPrefix(`/api`)"
+      entryPoints:
+        - web
+      service: api-go
+      middlewares:
+        - rate-limit-api
+        - security-headers
+
+    # ── WebSocket routes ──
+    realtime:
+      rule: "PathPrefix(`/ws`)"
+      entryPoints:
+        - web
+      service: realtime-node
+
+    # ── Health (no rate limit) ──
+    health:
+      rule: "Path(`/health`)"
+      entryPoints:
+        - web
+      service: api-go
+
+  services:
+    ingest-node:
+      loadBalancer:
+        servers:
+          - url: "http://ingest-node:3001"
+
+    api-go:
+      loadBalancer:
+        servers:
+          - url: "http://api-go:3003"
+
+    realtime-node:
+      loadBalancer:
+        servers:
+          - url: "http://realtime-node:3002"
+
+  middlewares:
+    # Ingest — higher throughput limit
+    rate-limit-ingest:
+      rateLimit:
+        average: 200
+        burst: 400
+        period: 1s
+
+    # API — standard rate limit
+    rate-limit-api:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
+
+    # Security headers
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Content-Type-Options: "nosniff"
+          X-Frame-Options: "DENY"
+          X-XSS-Protection: "1; mode=block"

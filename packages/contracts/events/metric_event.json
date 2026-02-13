@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lightwatch.dev/schemas/metric_event/v2",
+  "title": "Lightwatch Metric Event",
+  "description": "Schema for metric event ingestion. v2 adds event_id, trace_id, and schema_version.",
+  "type": "object",
+  "required": ["service", "name", "value"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Client-supplied unique event identifier. Generated server-side if omitted."
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Distributed trace identifier for correlating events across services."
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 2,
+      "description": "Schema version number."
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Source service name."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Metric identifier (e.g. cpu_usage, memory_mb)."
+    },
+    "value": {
+      "type": "number",
+      "description": "Metric numeric value."
+    },
+    "unit": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "Unit of measurement (e.g. percent, bytes, ms)."
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Indexed key-value tags for filtering and grouping."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Arbitrary metadata for extensibility.",
+      "additionalProperties": true
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp (ISO 8601). Defaults to server time if omitted."
+    }
+  },
+  "additionalProperties": false
+}

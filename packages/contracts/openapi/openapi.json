@@ -1,0 +1,248 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Monitoring Platform API",
+    "version": "1.0.0",
+    "description": "Unified API for ingesting telemetry and querying monitoring data."
+  },
+  "servers": [
+    { "url": "http://localhost", "description": "Local (via Traefik)" }
+  ],
+  "paths": {
+    "/ingest/metrics": {
+      "post": {
+        "tags": ["Ingest"],
+        "summary": "Push metric data point",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MetricEvent" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Accepted" } }
+      }
+    },
+    "/ingest/logs": {
+      "post": {
+        "tags": ["Ingest"],
+        "summary": "Push log entry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogEvent" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Accepted" } }
+      }
+    },
+    "/ingest/security": {
+      "post": {
+        "tags": ["Ingest"],
+        "summary": "Push security event",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SecurityEvent" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Accepted" } }
+      }
+    },
+    "/ingest/heartbeat": {
+      "post": {
+        "tags": ["Ingest"],
+        "summary": "Agent heartbeat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/HeartbeatEvent" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["API"],
+        "summary": "Health check",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/services": {
+      "get": {
+        "tags": ["API"],
+        "summary": "List known services",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/logs": {
+      "get": {
+        "tags": ["API"],
+        "summary": "Query logs",
+        "parameters": [
+          { "name": "service", "in": "query", "schema": { "type": "string" } },
+          { "name": "level", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "tags": ["API"],
+        "summary": "Query metrics",
+        "parameters": [
+          { "name": "service", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/security/events": {
+      "get": {
+        "tags": ["API"],
+        "summary": "Query security events",
+        "parameters": [
+          { "name": "ip", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/alerts": {
+      "get": {
+        "tags": ["API"],
+        "summary": "List alert rules",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["API"],
+        "summary": "Create alert rule",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AlertRule" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MetricEvent": {
+        "type": "object",
+        "required": ["service", "name", "value"],
+        "properties": {
+          "service": { "type": "string" },
+          "name": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "tags": { "type": "object" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LogEvent": {
+        "type": "object",
+        "required": ["service", "level", "message"],
+        "properties": {
+          "service": { "type": "string" },
+          "level": {
+            "type": "string",
+            "enum": ["debug", "info", "warn", "error"]
+          },
+          "message": { "type": "string" },
+          "meta": { "type": "object" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SecurityEvent": {
+        "type": "object",
+        "required": ["service", "type", "source_ip"],
+        "properties": {
+          "service": { "type": "string" },
+          "type": { "type": "string" },
+          "source_ip": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string" },
+          "meta": { "type": "object" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "HeartbeatEvent": {
+        "type": "object",
+        "required": ["service"],
+        "properties": {
+          "service": { "type": "string" },
+          "host": { "type": "string" },
+          "meta": { "type": "object" }
+        }
+      },
+      "AlertRule": {
+        "type": "object",
+        "required": ["name", "condition", "service"],
+        "properties": {
+          "name": { "type": "string" },
+          "condition": {
+            "type": "object",
+            "properties": {
+              "metric": { "type": "string" },
+              "operator": {
+                "type": "string",
+                "enum": ["gt", "lt", "eq", "gte", "lte"]
+              },
+              "threshold": { "type": "number" },
+              "duration": { "type": "string" }
+            }
+          },
+          "service": { "type": "string" },
+          "enabled": { "type": "boolean", "default": true }
+        }
+      }
+    }
+  }
+}

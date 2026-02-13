@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lightwatch.dev/schemas/log_event/v2",
+  "title": "Lightwatch Log Event",
+  "description": "Schema for log event ingestion. v2 adds event_id, trace_id, and schema_version for traceability and backward compatibility.",
+  "type": "object",
+  "required": ["service", "level", "message"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Client-supplied unique event identifier. Generated server-side if omitted."
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Distributed trace identifier for correlating events across services."
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 2,
+      "description": "Schema version number. Enables backward-compatible evolution."
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Source service name."
+    },
+    "level": {
+      "type": "string",
+      "enum": ["debug", "info", "warn", "error", "fatal"],
+      "description": "Log severity level."
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Human-readable log message."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Arbitrary key-value metadata for extensibility.",
+      "additionalProperties": true
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Indexed string key-value tags for filtering."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp (ISO 8601). Defaults to server time if omitted."
+    }
+  },
+  "additionalProperties": false
+}
