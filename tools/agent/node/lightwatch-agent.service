@@ -1,0 +1,39 @@
+[Unit]
+Description=Lightwatch Monitoring Agent
+Documentation=https://github.com/RapidTest25/monitoring-platform
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+
+ExecStart=/usr/bin/node /opt/lightwatch-agent/agent.js
+
+# Configuration — edit these for your environment
+Environment=LIGHTWATCH_BASE_URL=http://localhost
+Environment=SERVICE_NAME=my-server
+Environment=INTERVAL_SECONDS=10
+# Environment=LIGHTWATCH_API_KEY=your-api-key-here
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/proc/net/dev
+PrivateTmp=true
+
+# Logging — stdout goes to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=lightwatch-agent
+
+[Install]
+WantedBy=multi-user.target

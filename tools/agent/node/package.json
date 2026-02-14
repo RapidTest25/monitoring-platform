@@ -1,0 +1,19 @@
+{
+  "name": "lightwatch-agent",
+  "version": "1.0.0",
+  "description": "Lightweight system metrics agent for Lightwatch monitoring platform",
+  "main": "agent.js",
+  "bin": {
+    "lightwatch-agent": "./agent.js"
+  },
+  "scripts": {
+    "start": "node agent.js",
+    "dev": "node agent.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["monitoring", "agent", "metrics", "lightwatch"],
+  "license": "MIT",
+  "dependencies": {}
+}
